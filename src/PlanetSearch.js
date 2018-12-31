@@ -8,7 +8,8 @@ class PlanetSearch extends React.Component {
 		this.state = {
 			planets: [],
 			filteredPlanets: [],
-			planet: null
+			planet: null,
+			planetArray: []
 		}
 		this.onSearch = this.onSearch.bind(this)
 		this.removePopUp = this.removePopUp.bind(this)
@@ -16,20 +17,14 @@ class PlanetSearch extends React.Component {
 	}
 
 	componentDidMount() {
+
 		console.log("componentDidMount");
 		if (localStorage.getItem("name") == "") {
 			console.log("Yes already logged In");
 			browserHistory.goBack();
 		}
-		fetch("https://swapi.co/api/planets/")
-		.then(response => response.json())
-		.then(data => {
-			var array = data.results.sort(function(planet1, planet2){
-				return parseInt(planet1.diameter) < parseInt(planet2.diameter)
-			});
-			console.log("Sorted Array: ",array);
-			this.setState({planets: array, filteredPlanets: array});
-		})
+		document.getElementById("loader-view").style.display = "block";
+		this.fetchPlanets("https://swapi.co/api/planets/?page=1");
 	}
 
 	componentWillMount() {
@@ -54,6 +49,33 @@ class PlanetSearch extends React.Component {
 		document.getElementById("planetDetail").style.display = "none";
 	}
 
+	fetchPlanets(url) {
+		fetch(url)
+		.then(response => response.json())
+		.then(data => {
+			//console.log("This is whole JSON: ",data);
+			//this.setState({planetArray: data.results});
+			//this.state.planetArray.push(data.results);
+			//console.log("This is whole JSON planetArray : ",this.state.planetArray);
+			if (data.results != null) {
+				for (var index = 0; index < data.results.length; index++ ) {
+					this.state.planetArray.push(data.results[index]);
+				}
+				console.log("planetArray:::",this.state.planetArray.length);
+			}
+			if (data.next != null) {
+				this.fetchPlanets(data.next);
+			} else {
+				var array = this.state.planetArray.sort(function(planet1, planet2){
+					return parseInt(planet1.population) > parseInt(planet2.population)
+				});
+				console.log("Sorted Array: ",array);
+				this.setState({planets: array, filteredPlanets: array});
+				document.getElementById("loader-view").style.display = "none";
+			}
+		})
+	}
+
 	render() {
 		return (
 			<div>
@@ -65,8 +87,11 @@ class PlanetSearch extends React.Component {
 				<div class="planetList">
 				<PlanetList planets={this.state.planets} />
 				</div>
-				
+				<div class="transparent-div" id="loader-view">
+					<img src="/images/loader.gif" class="loader-img" />
+				</div>
 			</div>
+			
 		);
 	}
 }
@@ -79,15 +104,19 @@ class PlanetDetail extends React.Component {
 		}
 	}
 
+	getFormatterNumber(population) {
+		return population.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+	}
+
 	render() {
 		const planet = this.props.planet
 		return(
 			<ul class="planetInfoUL">
 				<li class="planetInfo">Name: {planet.name}</li>
-				<li class="planetInfo">Population: {planet.population}</li>
-				<li class="planetInfo">Rotation Period: {planet.rotation_period}</li>
-				<li class="planetInfo">Orbital Period: {planet.orbital_period}</li>
-				<li class="planetInfo">Diameter: {planet.diameter}</li>
+				<li class="planetInfo">Population: {this.getFormatterNumber(planet.population)}</li>
+				<li class="planetInfo">Rotation Period: {this.getFormatterNumber(planet.rotation_period)}</li>
+				<li class="planetInfo">Orbital Period: {this.getFormatterNumber(planet.orbital_period)}</li>
+				<li class="planetInfo">Diameter: {this.getFormatterNumber(planet.diameter)}</li>
 				<li class="planetInfo">Climate: {planet.climate}</li>
 				<li class="planetInfo">Climate: {planet.gravity}</li>
 				<li class="planetInfo">Terrain: {planet.terrain}</li>
@@ -127,6 +156,21 @@ class PlanetList extends React.Component {
 		
 	}
 
+	getFontSize(population) {
+		console.log("population:::::::",parseInt(population))
+
+		let value = parseInt(population)
+		let minFontSize = 25;
+		if (isNaN(value)) {
+			return 20;
+		} else {
+			let fontValue = (value/1000)
+			console.log("Font Value:::", fontValue);
+		}
+
+		return 50;
+	}
+
 	render() {
 
 	  return (
@@ -138,7 +182,7 @@ class PlanetList extends React.Component {
 			</div> :null}
 			<ul class="listing">
 				{this.props.planets.map(planet => (
-				<li class="licss" onClick={this.handleClick}>{planet.name}</li>
+				<li class="licss" onClick={this.handleClick} style={{fontSize: this.getFontSize(planet.population)}}>{planet.name}{this.state.population}</li>
 				))}
 			</ul>
 	  	</div>
