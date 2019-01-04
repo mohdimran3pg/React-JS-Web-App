@@ -5,15 +5,24 @@ class PlanetSearch extends React.Component {
 
 	constructor(props) {
 		super(props);
+		var datetime = new Date();
 		this.state = {
 			planets: [],
 			filteredPlanets: [],
 			planet: null,
-			planetArray: []
+			planetArray: [],
+			curretDateTime: datetime
 		}
 		this.onSearch = this.onSearch.bind(this)
 		this.removePopUp = this.removePopUp.bind(this)
 		this.onLogout = this.onLogout.bind(this)
+		//this.onStartTimer = this.onStartTimer.bind(this)
+	}
+
+	myTimer() {
+		var d = new Date();
+		var dt = new Date("2018-12-31");
+		console.log(dt);
 	}
 
 	componentDidMount() {
@@ -25,6 +34,7 @@ class PlanetSearch extends React.Component {
 		}
 		document.getElementById("loader-view").style.display = "block";
 		this.fetchPlanets("https://swapi.co/api/planets/?page=1");
+		setInterval(this.myTimer, 1000);
 	}
 
 	componentWillMount() {
@@ -66,12 +76,15 @@ class PlanetSearch extends React.Component {
 			if (data.next != null) {
 				this.fetchPlanets(data.next);
 			} else {
+				
 				var array = this.state.planetArray.sort(function(planet1, planet2){
 					return parseInt(planet1.population) > parseInt(planet2.population)
 				});
-				console.log("Sorted Array: ",array);
-				this.setState({planets: array, filteredPlanets: array});
+				var datetime = new Date();
+				//console.log("Sorted Array: ",array, "Date Time:::", datetime);
+				this.setState({planets: array, filteredPlanets: array, curretDateTime: datetime});
 				document.getElementById("loader-view").style.display = "none";
+				console.log("Date Time:::", this.state.curretDateTime);
 			}
 		})
 	}
@@ -160,10 +173,33 @@ class PlanetList extends React.Component {
 		console.log("population:::::::",parseInt(population))
 
 		let value = parseInt(population)
-		let minFontSize = 25;
+		let minFontSize = 15;
 		if (isNaN(value)) {
-			return 20;
+			return minFontSize - 3;
 		} else {
+
+			if (value >= 1000 && value <= 50000) {
+				return minFontSize;
+			} else if (value > 50000 && value <= 1500000) {
+				return minFontSize + 2.5;
+			}else if (value > 1500000 && value <= 3000000) {
+				return minFontSize + 5;
+			}else if (value > 3000000 && value <= 6000000) {
+				return minFontSize + 7.5;
+			}else if (value > 6000000 && value <= 9000000) {
+				return minFontSize + 10;
+			}else if (value > 9000000 && value <= 15000000) {
+				return minFontSize + 12.5;
+			}else if (value > 15000000 && value <= 100000000) {
+				return minFontSize + 15;
+			}else if (value > 100000000 && value <= 500000000) {
+				return minFontSize + 17.5;
+			}else if (value > 500000000 && value <= 1000000000) {
+				return minFontSize + 20;
+			} else {
+				return 40
+			}
+
 			let fontValue = (value/1000)
 			console.log("Font Value:::", fontValue);
 		}
