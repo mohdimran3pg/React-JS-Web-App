@@ -27,7 +27,7 @@ class SignInFormVC extends React.Component {
 			alert('Please enter password');
 		}else {
 		   document.getElementById("loader-view").style.display = "block";
-		   fetch('https://swapi.co/api/people/')
+		   fetch('https://swapi.co/api/people/?search='+this.state.username)
       		.then(response => response.json())
       		.then(data => {
       			document.getElementById("loader-view").style.display = "none";

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import './PlanetSearch.css';
 import {browserHistory} from 'react-router';
+import {DebounceInput} from 'react-debounce-input';
 class PlanetSearch extends React.Component {
 
 	constructor(props) {
@@ -11,7 +12,8 @@ class PlanetSearch extends React.Component {
 			filteredPlanets: [],
 			planet: null,
 			planetArray: [],
-			curretDateTime: datetime
+			curretDateTime: datetime,
+			apiCounter: 0,
 		}
 		this.onSearch = this.onSearch.bind(this)
 		this.removePopUp = this.removePopUp.bind(this)
@@ -22,7 +24,7 @@ class PlanetSearch extends React.Component {
 	myTimer() {
 		var d = new Date();
 		var dt = new Date("2018-12-31");
-		console.log(dt);
+		//console.log(dt);
 	}
 
 	componentDidMount() {
@@ -47,16 +49,54 @@ class PlanetSearch extends React.Component {
 	}
 
 	onSearch(event) {
-		console.log(this.state.filteredPlanets);
-		var array = this.state.filteredPlanets.filter(planet => {
-			console.log("search text:::::" + event.target.value);
-			return planet.name.toLowerCase().indexOf(event.target.value.toLowerCase()) !== -1
-		});
-		this.setState({planets: array});
+
+		//https://swapi.co/api/planets/?search=al
+		this.searchPlanets("https://swapi.co/api/planets/?search="+event.target.value.toLowerCase(), event.target.value)
+
+		// console.log(this.state.filteredPlanets);
+		// var array = this.state.filteredPlanets.filter(planet => {
+		// 	console.log("search text:::::" + event.target.value);
+		// 	return planet.name.toLowerCase().indexOf(event.target.value.toLowerCase()) !== -1
+		// });
+		// this.setState({planets: array});
 	}
 
 	removePopUp(event){
 		document.getElementById("planetDetail").style.display = "none";
+	}
+
+	searchPlanets(url, searchKeyword) {
+		
+		console.log("URL:::", url);
+		if(searchKeyword == "") {
+			console.log("Search Keyword:::", searchKeyword);
+			this.setState({planets: this.state.filteredPlanets});
+		} else {
+
+			document.getElementById("loader-view").style.display = "block";
+		fetch(url)
+		.then(response => response.json())
+		.then(data => {
+			if (data.results != null) {
+				this.setState({planets: [], curretDateTime: datetime});
+				this.setState({planetArray: [], curretDateTime: datetime});
+				console.log("Search Results:::",data.results);
+				for (var index = 0; index < data.results.length; index++ ) {
+					this.state.planetArray.push(data.results[index]);
+				}
+			}
+
+			var array = this.state.planetArray.sort(function(planet1, planet2){
+				return parseInt(planet1.population) > parseInt(planet2.population)
+			});
+			var datetime = new Date();
+			//console.log("Sorted Array: ",array, "Date Time:::", datetime);
+			this.setState({planets: array, curretDateTime: datetime});
+			document.getElementById("loader-view").style.display = "none";
+			console.log("Date Time:::", this.state.curretDateTime);
+		})
+		}
+		
 	}
 
 	fetchPlanets(url) {
@@ -74,6 +114,9 @@ class PlanetSearch extends React.Component {
 				console.log("planetArray:::",this.state.planetArray.length);
 			}
 			if (data.next != null) {
+				this.state.apiCounter += 1
+				document.getElementById("loader-view").style.display = "none";
+				this.setState({planets: this.state.planetArray, filteredPlanets: this.state.planetArray, curretDateTime: datetime});
 				this.fetchPlanets(data.next);
 			} else {
 				
@@ -83,7 +126,7 @@ class PlanetSearch extends React.Component {
 				var datetime = new Date();
 				//console.log("Sorted Array: ",array, "Date Time:::", datetime);
 				this.setState({planets: array, filteredPlanets: array, curretDateTime: datetime});
-				document.getElementById("loader-view").style.display = "none";
+				//document.getElementById("loader-view").style.display = "none";
 				console.log("Date Time:::", this.state.curretDateTime);
 			}
 		})
@@ -95,7 +138,10 @@ class PlanetSearch extends React.Component {
 				<div class="topnav">
 					<a class="active" href="javascript:void(0);">Welcome <i>{localStorage.getItem("name")}</i></a>
 					<a  href="javascript:void(0);" onClick={this.onLogout} class="closeLink">Logout</a>
-					<input type="text" placeholder="Enter planet name here to search....." onChange = {this.onSearch} />
+					<DebounceInput
+          minLength={2}
+          debounceTimeout={300}
+          onChange={this.onSearch} />
 				</div>
 				<div class="planetList">
 				<PlanetList planets={this.state.planets} />
@@ -199,12 +245,7 @@ class PlanetList extends React.Component {
 			} else {
 				return 40
 			}
-
-			let fontValue = (value/1000)
-			console.log("Font Value:::", fontValue);
 		}
-
-		return 50;
 	}
 
 	render() {
