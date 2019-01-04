@@ -1,10 +1,10 @@
 /* Add a black background color to the top navigation bar */
 .topnav {
-	width: 70%;	
+	width: 90%;	
     overflow: hidden;
 	background-color: #e9e9e9;
 	position: fixed;
-	left: 17%;
+	left: 5%;
 	margin-top: 25px;
 }
 
@@ -70,9 +70,9 @@
 .planetList {
 	position: fixed;
 	margin-top: 100px;
-	width: 70%;
-	left: 17%;
-	height: 600px;
+	width: 90%;
+	left: 5%;
+	height: 90%;
 	border: 1px solid green;
 	overflow-y:scroll;
 }

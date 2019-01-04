@@ -4,31 +4,25 @@ import {browserHistory} from 'react-router';
 import {DebounceInput} from 'react-debounce-input';
 class PlanetSearch extends React.Component {
 
+	
 	constructor(props) {
 		super(props);
-		var datetime = new Date();
+		var searchAttempt = 0;
 		this.state = {
 			planets: [],
 			filteredPlanets: [],
 			planet: null,
 			planetArray: [],
-			curretDateTime: datetime,
 			apiCounter: 0,
 		}
 		this.onSearch = this.onSearch.bind(this)
 		this.removePopUp = this.removePopUp.bind(this)
 		this.onLogout = this.onLogout.bind(this)
-		//this.onStartTimer = this.onStartTimer.bind(this)
-	}
-
-	myTimer() {
-		var d = new Date();
-		var dt = new Date("2018-12-31");
-		//console.log(dt);
 	}
 
 	componentDidMount() {
 
+		this.searchAttempt = 0;
 		console.log("componentDidMount");
 		if (localStorage.getItem("name") == "") {
 			console.log("Yes already logged In");
@@ -36,7 +30,6 @@ class PlanetSearch extends React.Component {
 		}
 		document.getElementById("loader-view").style.display = "block";
 		this.fetchPlanets("https://swapi.co/api/planets/?page=1");
-		setInterval(this.myTimer, 1000);
 	}
 
 	componentWillMount() {
@@ -48,17 +41,37 @@ class PlanetSearch extends React.Component {
 		browserHistory.goBack();
 	}
 
+	startTimer() {
+		setTimeout(() => {
+			this.cleanAttempt()
+		}, 1000*60);
+		//setInterval(this.cleanAttempt(), 1000*10);
+	}
+
+	cleanAttempt() {
+		this.searchAttempt = 0;
+		console.log("Clean Timer:::::");
+	}
+
 	onSearch(event) {
 
-		//https://swapi.co/api/planets/?search=al
-		this.searchPlanets("https://swapi.co/api/planets/?search="+event.target.value.toLowerCase(), event.target.value)
+		console.log("this.searchAttempt::::", this.searchAttempt);
 
-		// console.log(this.state.filteredPlanets);
-		// var array = this.state.filteredPlanets.filter(planet => {
-		// 	console.log("search text:::::" + event.target.value);
-		// 	return planet.name.toLowerCase().indexOf(event.target.value.toLowerCase()) !== -1
-		// });
-		// this.setState({planets: array});
+		if(this.searchAttempt == 0) {
+
+			this.startTimer()
+			
+		} 
+
+		this.searchAttempt += 1
+		if(this.searchAttempt > 5) {
+			alert("You have already made 5 search attempt");
+		} else {
+			
+			this.searchPlanets("https://swapi.co/api/planets/?search="+event.target.value.toLowerCase(), event.target.value)
+		}
+
+		
 	}
 
 	removePopUp(event){
@@ -78,8 +91,7 @@ class PlanetSearch extends React.Component {
 		.then(response => response.json())
 		.then(data => {
 			if (data.results != null) {
-				this.setState({planets: [], curretDateTime: datetime});
-				this.setState({planetArray: [], curretDateTime: datetime});
+				this.setState({planets: [], planetArray: []});
 				console.log("Search Results:::",data.results);
 				for (var index = 0; index < data.results.length; index++ ) {
 					this.state.planetArray.push(data.results[index]);
@@ -90,11 +102,14 @@ class PlanetSearch extends React.Component {
 				return parseInt(planet1.population) > parseInt(planet2.population)
 			});
 			var datetime = new Date();
-			//console.log("Sorted Array: ",array, "Date Time:::", datetime);
-			this.setState({planets: array, curretDateTime: datetime});
+			this.setState({planets: array});
 			document.getElementById("loader-view").style.display = "none";
 			console.log("Date Time:::", this.state.curretDateTime);
 		})
+		.catch(error => {
+			document.getElementById("loader-view").style.display = "none";
+			alert(error)
+		});
 		}
 		
 	}
@@ -111,12 +126,12 @@ class PlanetSearch extends React.Component {
 				for (var index = 0; index < data.results.length; index++ ) {
 					this.state.planetArray.push(data.results[index]);
 				}
-				console.log("planetArray:::",this.state.planetArray.length);
+				//console.log("planetArray:::",this.state.planetArray.length);
 			}
 			if (data.next != null) {
 				this.state.apiCounter += 1
 				document.getElementById("loader-view").style.display = "none";
-				this.setState({planets: this.state.planetArray, filteredPlanets: this.state.planetArray, curretDateTime: datetime});
+				this.setState({planets: this.state.planetArray, filteredPlanets: this.state.planetArray});
 				this.fetchPlanets(data.next);
 			} else {
 				
@@ -125,11 +140,15 @@ class PlanetSearch extends React.Component {
 				});
 				var datetime = new Date();
 				//console.log("Sorted Array: ",array, "Date Time:::", datetime);
-				this.setState({planets: array, filteredPlanets: array, curretDateTime: datetime});
+				this.setState({planets: array, filteredPlanets: array});
 				//document.getElementById("loader-view").style.display = "none";
-				console.log("Date Time:::", this.state.curretDateTime);
+				//console.log("Date Time:::", this.state.curretDateTime);
 			}
 		})
+		.catch(error => {
+			document.getElementById("loader-view").style.display = "none";
+			alert(error)
+		});
 	}
 
 	render() {
@@ -216,7 +235,7 @@ class PlanetList extends React.Component {
 	}
 
 	getFontSize(population) {
-		console.log("population:::::::",parseInt(population))
+		//console.log("population:::::::",parseInt(population))
 
 		let value = parseInt(population)
 		let minFontSize = 15;

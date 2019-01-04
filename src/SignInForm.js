@@ -20,10 +20,10 @@ class SignInFormVC extends React.Component {
 	
 	
 	handleSubmit(event) {
-		const weakself = this
-		if(this.state.username.trim().length == 0) {
+		
+		if(this.state.username.trim().length === 0) {
 			alert('Please enter username');
-		}else if(this.state.password.length == 0) {
+		}else if(this.state.password.length === 0) {
 			alert('Please enter password');
 		}else {
 		   document.getElementById("loader-view").style.display = "block";
@@ -37,7 +37,11 @@ class SignInFormVC extends React.Component {
 				} else {
 					alert('Username or password is wrong.');
 				}
-      		});
+			  })
+			  .catch(error => {
+				  document.getElementById("loader-view").style.display = "none";
+				  alert(error)
+			  });
 		}
 		event.preventDefault();
 	}
@@ -53,7 +57,7 @@ class SignInFormVC extends React.Component {
 	isValidLogin(data) {
 		console.log("this is data: ",data)
 		for(var i=0;i<data.results.length;i++){
-			if(this.state.username.toLowerCase() == data.results[i].name.toLowerCase() && this.state.password == data.results[i].birth_year){
+			if(this.state.username.toLowerCase() === data.results[i].name.toLowerCase() && this.state.password === data.results[i].birth_year){
 				return true
 			}
 		}
