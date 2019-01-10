@@ -11,8 +11,7 @@ class SignInFormVC extends React.Component {
 		  username: "",
 		  password: "",
 		  name: "",
-		  films:[]
-    	};
+		};
 		this.handleMyInput = this.handleMyInput.bind(this);
 		this.handleSubmit = this.handleSubmit.bind(this);
 	}

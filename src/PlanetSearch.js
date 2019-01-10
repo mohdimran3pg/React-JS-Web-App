@@ -64,7 +64,7 @@ class PlanetSearch extends React.Component {
 		} 
 
 		this.searchAttempt += 1
-		if(this.searchAttempt > 5) {
+		if(this.searchAttempt > 5 && localStorage.getItem("name").toLowerCase().trim() != "luke skywalker") {
 			alert("You have already made 5 search attempt");
 		} else {
 			
@@ -190,15 +190,15 @@ class PlanetDetail extends React.Component {
 		const planet = this.props.planet
 		return(
 			<ul class="planetInfoUL">
-				<li class="planetInfo">Name: {planet.name}</li>
-				<li class="planetInfo">Population: {this.getFormatterNumber(planet.population)}</li>
-				<li class="planetInfo">Rotation Period: {this.getFormatterNumber(planet.rotation_period)}</li>
-				<li class="planetInfo">Orbital Period: {this.getFormatterNumber(planet.orbital_period)}</li>
-				<li class="planetInfo">Diameter: {this.getFormatterNumber(planet.diameter)}</li>
-				<li class="planetInfo">Climate: {planet.climate}</li>
-				<li class="planetInfo">Climate: {planet.gravity}</li>
-				<li class="planetInfo">Terrain: {planet.terrain}</li>
-				<li class="planetInfo">Surface Water: {planet.surface_water}</li>
+				<li class="planetInfo"><span class="headingSpan">Name:</span> <span class="planetDetailInfo">{planet.name}</span> </li>
+				<li class="planetInfo"><span class="headingSpan">Population:</span>  <span class="planetDetailInfo">{this.getFormatterNumber(planet.population)}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Rotation Period:</span>  <span class="planetDetailInfo">{this.getFormatterNumber(planet.rotation_period)}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Orbital Period:</span>  <span class="planetDetailInfo">{this.getFormatterNumber(planet.orbital_period)}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Diameter:</span>  <span class="planetDetailInfo">{this.getFormatterNumber(planet.diameter)}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Climate:</span>  <span class="planetDetailInfo">{planet.climate}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Climate:</span>  <span class="planetDetailInfo">{planet.gravity}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Terrain:</span>  <span class="planetDetailInfo">{planet.terrain}</span></li>
+				<li class="planetInfo"><span class="headingSpan">Surface Water:</span> <span class="planetDetailInfo">{planet.surface_water}</span></li>
 			</ul>
 		);
 	}
@@ -273,14 +273,19 @@ class PlanetList extends React.Component {
 		<div>
 			{this.state.planet !=null?
 			<div class="popupBox" id="planetDetail">
-				<a href="javascript:void(0);" onClick={this.removePopUp}>Close</a>
+				<a href="javascript:void(0);" onClick={this.removePopUp} class="closePopUp">Close</a>
 				<PlanetDetail planet={this.state.planet}/> 
 			</div> :null}
+			{this.props.planets.length != 0 ?
 			<ul class="listing">
+				
 				{this.props.planets.map(planet => (
 				<li class="licss" onClick={this.handleClick} style={{fontSize: this.getFontSize(planet.population)}}>{planet.name}{this.state.population}</li>
-				))}
+				)) 
+				}
 			</ul>
+			: <img src="/images/no-planet-found.png" class="no-planet-not-found"/>}
+			
 	  	</div>
 	  );
 	}
